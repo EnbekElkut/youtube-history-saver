@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>YouTube历史记录</title>
   <link rel="stylesheet" href="css/popup.css">
+  <link rel="stylesheet" href="css/snake-game.css">
 </head>
 <body>
   <div class="container">
     <!-- 头部 -->
     <header class="header">
-      <h1>YouTube历史记录</h1>
+      <h1>YouTube历史记录 <button id="snakeGameBtn" class="snake-toggle-btn" type="button">🐍 贪吃蛇</button></h1>
       <div class="stats">
         <span class="stat-item">
           <span class="stat-label">总记录数:</span>
@@ -55,9 +56,30 @@
     </div>
   </div>
 
+  <div class="snake-modal" id="snakeGameModal" style="display: none;">
+    <div class="snake-card">
+      <div class="snake-header">
+        <h2>贪吃蛇小游戏</h2>
+        <button id="snakeCloseBtn" class="snake-close-btn" type="button">✕</button>
+      </div>
+      <div class="snake-scoreboard">
+        <span>当前分数: <strong id="snakeScore">0</strong></span>
+        <span>最高分: <strong id="snakeBestScore">0</strong></span>
+      </div>
+      <canvas id="snakeCanvas" width="360" height="360" aria-label="贪吃蛇游戏画布"></canvas>
+      <p class="snake-help">方向键或 WASD 控制移动，吃到食物会变长。</p>
+      <div class="snake-actions">
+        <button id="snakeStartBtn" class="btn btn-primary" type="button">开始</button>
+        <button id="snakePauseBtn" class="btn btn-secondary" type="button">暂停</button>
+        <button id="snakeRestartBtn" class="btn btn-success" type="button">重新开始</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 导入文件输入 -->
   <input type="file" id="importFile" accept=".json" style="display: none;">
 
   <script src="js/popup.js"></script>
+  <script src="js/snake-game.js"></script>
 </body>
 </html>
