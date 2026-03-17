@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const tileSize = 20;
   const tileCount = canvas.width / tileSize;
-  const speed = 120;
+  const tickIntervalMs = 120;
   const bestScoreKey = 'snakeBestScore';
   let gameTimer = null;
   let snake = [{ x: 9, y: 9 }];
@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let score = 0;
   let bestScore = Number(localStorage.getItem(bestScoreKey)) || 0;
   let gameOver = false;
+  let isModalOpen = false;
 
   bestScoreEl.textContent = String(bestScore);
   updateScore(0);
@@ -38,11 +39,13 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function openModal() {
+    isModalOpen = true;
     modal.style.display = 'flex';
     draw();
   }
 
   function closeModal() {
+    isModalOpen = false;
     modal.style.display = 'none';
     pauseGame();
   }
@@ -53,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    gameTimer = setInterval(tick, speed);
+    gameTimer = setInterval(tick, tickIntervalMs);
   }
 
   function pauseGame() {
@@ -76,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function handleKeydown(event) {
-    if (modal.style.display === 'none') return;
+    if (!isModalOpen) return;
 
     const key = event.key.toLowerCase();
     const isArrow = ['arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key);
@@ -133,16 +136,23 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function placeFood() {
-    let nextFood = null;
-    while (!nextFood) {
-      const candidate = {
-        x: Math.floor(Math.random() * tileCount),
-        y: Math.floor(Math.random() * tileCount)
-      };
-      const onSnake = snake.some((part) => part.x === candidate.x && part.y === candidate.y);
-      if (!onSnake) nextFood = candidate;
+    const emptyCells = [];
+
+    for (let y = 0; y < tileCount; y++) {
+      for (let x = 0; x < tileCount; x++) {
+        const occupied = snake.some((part) => part.x === x && part.y === y);
+        if (!occupied) {
+          emptyCells.push({ x, y });
+        }
+      }
     }
-    food = nextFood;
+
+    if (emptyCells.length === 0) {
+      endGame();
+      return;
+    }
+
+    food = emptyCells[Math.floor(Math.random() * emptyCells.length)];
   }
 
   function updateScore(nextScore) {
