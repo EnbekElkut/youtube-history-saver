@@ -66,10 +66,11 @@
         <button id="snakeCloseBtn" class="snake-close-btn" type="button">✕</button>
       </div>
       <div class="snake-scoreboard">
-        <span>当前分数: <strong id="snakeScore">0</strong></span>
-        <span>最高分: <strong id="snakeBestScore">0</strong></span>
+        <span>当前分数: <strong id="snakeScore" aria-live="polite">0</strong></span>
+        <span>最高分: <strong id="snakeBestScore" aria-live="polite">0</strong></span>
       </div>
-      <canvas id="snakeCanvas" width="360" height="360" aria-label="贪吃蛇游戏画布"></canvas>
+      <canvas id="snakeCanvas" width="360" height="360" role="img" aria-label="贪吃蛇游戏画布">当前浏览器不支持 Canvas，无法运行贪吃蛇小游戏。</canvas>
+      <p id="snakeAnnouncer" class="snake-sr-only" aria-live="polite"></p>
       <p class="snake-help">方向键或 WASD 控制移动，吃到食物会变长。</p>
       <div class="snake-actions">
         <button id="snakeStartBtn" class="btn btn-primary" type="button">开始</button>

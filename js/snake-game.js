@@ -7,24 +7,29 @@ document.addEventListener('DOMContentLoaded', () => {
   const restartBtn = document.getElementById('snakeRestartBtn');
   const scoreEl = document.getElementById('snakeScore');
   const bestScoreEl = document.getElementById('snakeBestScore');
+  const announcerEl = document.getElementById('snakeAnnouncer');
   const canvas = document.getElementById('snakeCanvas');
   const ctx = canvas.getContext('2d');
 
   const tileSize = 20;
   const tileCount = canvas.width / tileSize;
+  const center = Math.floor(tileCount / 2);
   const tickIntervalMs = 120;
   const bestScoreKey = 'snakeBestScore';
+  const storedBestScore = localStorage.getItem(bestScoreKey);
   let gameTimer = null;
-  let snake = [{ x: 9, y: 9 }];
+  let snake = [{ x: center, y: center }];
   let direction = { x: 1, y: 0 };
   let nextDirection = { x: 1, y: 0 };
-  let food = { x: 4, y: 4 };
+  let food = { x: 0, y: 0 };
   let score = 0;
-  let bestScore = Number(localStorage.getItem(bestScoreKey)) || 0;
+  let bestScore = parseInt(storedBestScore ?? '0', 10);
   let gameOver = false;
+  let hasWon = false;
   let isModalOpen = false;
 
   bestScoreEl.textContent = String(bestScore);
+  placeFood();
   updateScore(0);
   draw();
 
@@ -34,6 +39,9 @@ document.addEventListener('DOMContentLoaded', () => {
   pauseBtn.addEventListener('click', pauseGame);
   restartBtn.addEventListener('click', restartGame);
   document.addEventListener('keydown', handleKeydown);
+  window.addEventListener('unload', () => {
+    document.removeEventListener('keydown', handleKeydown);
+  });
   modal.addEventListener('click', (event) => {
     if (event.target === modal) closeModal();
   });
@@ -51,27 +59,34 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function startGame() {
-    if (gameTimer || gameOver) {
-      if (gameOver) restartGame();
+    if (gameOver) {
+      restartGame();
+      return;
+    }
+
+    if (gameTimer) {
       return;
     }
 
     gameTimer = setInterval(tick, tickIntervalMs);
+    announce('游戏开始');
   }
 
   function pauseGame() {
     if (!gameTimer) return;
     clearInterval(gameTimer);
     gameTimer = null;
+    announce('游戏暂停');
   }
 
   function restartGame() {
     pauseGame();
-    snake = [{ x: 9, y: 9 }];
+    snake = [{ x: center, y: center }];
     direction = { x: 1, y: 0 };
     nextDirection = { x: 1, y: 0 };
     score = 0;
     gameOver = false;
+    hasWon = false;
     placeFood();
     updateScore(0);
     draw();
@@ -86,7 +101,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const isWasd = ['w', 'a', 's', 'd'].includes(key);
 
     if (!isArrow && !isWasd) return;
-    event.preventDefault();
+    if (isModalOpen) {
+      event.preventDefault();
+    }
 
     if (key === 'arrowup' || key === 'w') setDirection(0, -1);
     if (key === 'arrowdown' || key === 's') setDirection(0, 1);
@@ -111,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     if (isCollision(head)) {
-      endGame();
+      endGame(false);
       return;
     }
 
@@ -148,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (emptyCells.length === 0) {
-      endGame();
+      endGame(true);
       return;
     }
 
@@ -166,9 +183,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function endGame() {
+  function announce(message) {
+    announcerEl.textContent = message;
+  }
+
+  function endGame(won) {
     pauseGame();
     gameOver = true;
+    hasWon = won;
+    announce(won ? '恭喜通关，你已填满整个棋盘' : '游戏结束');
     draw();
   }
 
@@ -190,9 +213,9 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.fillStyle = '#ffffff';
       ctx.font = '28px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('游戏结束', canvas.width / 2, canvas.height / 2 - 10);
+      ctx.fillText(hasWon ? '恭喜通关' : '游戏结束', canvas.width / 2, canvas.height / 2 - 10);
       ctx.font = '16px sans-serif';
-      ctx.fillText('点击“重新开始”再来一局', canvas.width / 2, canvas.height / 2 + 22);
+      ctx.fillText(hasWon ? '你已填满整个棋盘！' : '点击“重新开始”再来一局', canvas.width / 2, canvas.height / 2 + 22);
     }
   }
 });
